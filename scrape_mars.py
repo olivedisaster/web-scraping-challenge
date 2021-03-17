@@ -1,3 +1,4 @@
+from os import link
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup as bs
@@ -9,80 +10,76 @@ def init_browser():
     executable_path = {'executable_path': 'C:/Program Files/chromedriver_win32/chromedriver.exe'}
     return Browser('chrome', **executable_path, headless=False)
 
-def scrape():
+mars_info_dict = {}
+
+def scrape_info():
     browser = init_browser()
 
-    #Mars News
-    url = 'https://mars.nasa.gov/news/'
-    browser.visit(url)
+#Mars News
+    
+    news_url = 'https://mars.nasa.gov/news/'
+    browser.visit(news_url)
     html = browser.html
-    soup = bs(html, 'lxml')
+    soup = bs(html, 'html.parser')
 
     title = soup.find('div', class_="content_title")
     title_text = title.a.text
     title_text = title_text.strip()
-    news_p = soup.find("div", class_="rollover_description_inner")
+    news_p = soup.find("div", class_="article_teaser_body")
     news_text = news_p.text
     news_text = news_text.strip()
 
     #Featured Photo
-    url2 = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
-    browser.visit(url2)
-    html2 = browser.html
-    soup2 = bs(html2, 'html.parser')
 
-    results = soup2.find("ul", class_="articles")
+    featured_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
+    browser.visit(featured_url)
+    img_html = browser.html
+    img_soup = bs(img_html, 'html.parser')
+
+    img_featured = img_soup.find("ul", class_="articles")
     href = results.find("a",class_='fancybox')['data-fancybox-href']
-    featured_image_url = 'https://www.jpl.nasa.gov' + href
+    img_url_main = 'https://www.jpl.nasa.gov' + href
 
-    #Mars Weather
-    url3 = 'https://twitter.com/marswxreport?lang=en'
-    browser.visit(url3)
-    html3 = browser.html
-    soup3 = bs(html3, 'html.parser')
+    featured_img_url = img_url_main + img_featured
 
-    results2 = soup3.find('div', class_="js-tweet-text-container")
-    tweet = results2.find("p", class_="TweetTextSize TweetTextSize--normal js-tweet-text tweet-text").text
-    tweet_split = tweet.rsplit("pic")
-    mars_weather = tweet_split[0]
+    mars_info_dict["featured_img_url"] = featured_img_url
 
     #Mars Facts
-    url4 = 'https://space-facts.com/mars/'
-    facts_table = pd.read_html(url4)
+
+    mars_url = 'https://space-facts.com/mars/'
+    facts_table = pd.read_html(mars_url)
     facts_df = facts_table[0]
     facts_df.columns = ["Description", "Value"]
     facts_df = facts_df.set_index("Description")
     facts_html = facts_df.to_html()
 
     #Mars Hemispheres
-    url5 = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
-    browser.visit(url5)
-    html4 = browser.html
-    soup4 = bs(html4, 'html.parser')
 
-    titles = soup4.find_all("h3")
-    for title in titles:
-        browser.click_link_by_partial_text("Hemisphere")
+    hemispheres_img_urls = []
 
-    results4 = soup4.find_all("div", class_="description")
-    mars_dict={}
-    hemisphere_image_urls=[]
-    for result in results4:
-        link = result.find('a')
-        img_href = link['href']
-        title_img = link.find('h3').text
-        url6 = "https://astrogeology.usgs.gov" + img_href
-        browser.visit(url6)
-        html5 = browser.html
-        soup5 = bs(html5, 'html.parser')
-        pic = soup5.find("a", target="_blank")
-        pic_href = pic['href']
-        hemisphere_image_urls.append({"title":title_img,"img_url":pic_href})
+    hemispheres_url = "https://astrogeology.usgs.gov/search/results?q=hemisphere+enhanced&k1=target&v1=Mars"
+    browser.visit(hemispheres_url)
 
-    #Dictionary of all Mars Info Scraped
-    mars_info_dict = {"news_title":title_text,"news_text":news_text,"featured_image":featured_image_url,
-    "mars_weather":mars_weather,"facts_table":facts_html,"hemisphere_img":hemisphere_image_urls}
+    hemispheres_html = browser.html
+    hemispheres_soup = bs(hemispheres_html, 'html.parser')
 
-    browser.quit()
+    hemispheres = hemispheres_soup.find_all('div', class_='item')
 
-    return mars_info_dict
+    for h in hemispheres:
+	    title = h.find("h3").text
+		hem_img = h.find("a", class_="itemLink product-item")["href"]
+
+        browser.visit(hemispheres_url + hem_img)    
+
+        hem_results = hemispheres_soup.find('img', class_='wide-image')
+        hemispheres_url = 'https://astrogeology.usgs.gov/' + hem_results["src"]
+
+        hemispheres_img_urls = []
+
+        hemispheres_img_urls.append({"title":link, "img_url":hemispheres_url})
+             
+
+
+        mars_info_dict["hemispheres_info"] = hemispheres_img_urls
+
+        return mars_info_dict
