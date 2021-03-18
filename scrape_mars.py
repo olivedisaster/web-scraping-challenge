@@ -5,18 +5,23 @@ from bs4 import BeautifulSoup as bs
 import pymongo
 from splinter import Browser
 
-#Browser
+# Browser
+
+
 def init_browser():
-    executable_path = {'executable_path': 'C:/Program Files/chromedriver_win32/chromedriver.exe'}
+    executable_path = {
+        'executable_path': 'C:/Program Files/chromedriver_win32/chromedriver.exe'}
     return Browser('chrome', **executable_path, headless=False)
 
+
 mars_info_dict = {}
+
 
 def scrape_info():
     browser = init_browser()
 
-#Mars News
-    
+# Mars News
+
     news_url = 'https://mars.nasa.gov/news/'
     browser.visit(news_url)
     html = browser.html
@@ -29,7 +34,7 @@ def scrape_info():
     news_text = news_p.text
     news_text = news_text.strip()
 
-    #Featured Photo
+    # Featured Photo
 
     featured_url = "https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars"
     browser.visit(featured_url)
@@ -37,14 +42,14 @@ def scrape_info():
     img_soup = bs(img_html, 'html.parser')
 
     img_featured = img_soup.find("ul", class_="articles")
-    href = results.find("a",class_='fancybox')['data-fancybox-href']
+    href = results.find("a", class_='fancybox')['data-fancybox-href']
     img_url_main = 'https://www.jpl.nasa.gov' + href
 
     featured_img_url = img_url_main + img_featured
 
     mars_info_dict["featured_img_url"] = featured_img_url
 
-    #Mars Facts
+    # Mars Facts
 
     mars_url = 'https://space-facts.com/mars/'
     facts_table = pd.read_html(mars_url)
@@ -53,7 +58,7 @@ def scrape_info():
     facts_df = facts_df.set_index("Description")
     facts_html = facts_df.to_html()
 
-    #Mars Hemispheres
+    # Mars Hemispheres
 
     hemispheres_img_urls = []
 
@@ -67,10 +72,10 @@ def scrape_info():
 
     for h in hemispheres:
 	    title = h.find("h3").text
-		hem_img = h.find("a", class_="itemLink product-item")["href"]
-
-        browser.visit(hemispheres_url + hem_img)    
-
+        hem_img = h.find("a", class_="itemLink product-item")["href"]
+        browser.visit(hemispheres_url + hem_img)
+        
+          
         hem_results = hemispheres_soup.find('img', class_='wide-image')
         hemispheres_url = 'https://astrogeology.usgs.gov/' + hem_results["src"]
 
@@ -83,3 +88,4 @@ def scrape_info():
         mars_info_dict["hemispheres_info"] = hemispheres_img_urls
 
         return mars_info_dict
+            
