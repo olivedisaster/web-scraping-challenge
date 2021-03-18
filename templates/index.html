@@ -20,19 +20,19 @@
 
     <div class="container-fluid">
       <h2><b>Latest Mars News</b></h2>
-      <h5>{{ mars_info_dict.news_title }}</h5>
-      <p>{{ mars_info_dict.news_text }}</p>
+      <h5>{{ mars.news_title }}</h5>
+      <p>{{ mars.paragraph }}</p>
     </div>
 
     <div class="container-fluid">
       <div class="row">
       <div class="col-md-8">
         <h2><b>Featured Mars Image</b></h2>
-        <img src="{{ mars_info_dict.featured_image }}" alt="Featured Mars Image" style="max-width:600px; max-height: 800px;">
+        <img src="{{ mars.featured_image }}" alt="Featured Mars Image" style="max-width:600px; max-height: 800px;">
       </div>
         <br>
         <h5>Mars Facts</h5>
-        <div>{{ mars_info_dict.facts_table |safe }}</div>
+        <div>{{ mars.facts_table |safe }}</div>
       </div>
       </div>
     </div>
@@ -40,7 +40,7 @@
     <div class="container-fluid text-center">
       <h2><b>Mars Hemispheres</b></h2>
       <div class="row">
-        {% for img in mars_info_dict.hemisphere_img %}
+        {% for img in mars.hemisphere_img %}
         <div class="col-md-6">
           <div class="card" style="size: 25rem;">
             <img src="{{ img.img_url }}" class="card-img-top" alt="{{ img.title }}">

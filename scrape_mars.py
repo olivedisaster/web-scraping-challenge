@@ -33,9 +33,9 @@ def scrape_info():
     browser.visit(featured_url)
     img_html = browser.html
     img_soup = bs(img_html, 'html.parser')
-    img_featured = img_soup.find('div',class_='carousel_container').article.footer.a['data-fancybox-href']
-    link = "https:"+jpl_soup.find('div', class_='jpl_logo').a['href'].rstrip('/')
-    img_url_main = link + image_featured
+    # img_featured = img_soup.find('div',class_='carousel_container').article.footer.a['data-fancybox-href']
+    link = "https:"+soup.find('div', class_='jpl_logo').a['href'].rstrip('/')
+    img_url_main = link
     mars_info_dict["featured_img_url"] = featured_img_url
     # Mars Facts
     mars_url = 'https://space-facts.com/mars/'
@@ -64,4 +64,8 @@ def scrape_info():
     mars_info_dict["hemisphere_imgs"] = hemisphere_img_urls
     browser.quit()
     return mars_info_dict
-print(scrape_info())
+
+
+
+
+
